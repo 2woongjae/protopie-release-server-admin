@@ -1,0 +1,27 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #222;
+  height: 70px;
+  padding: 20px;
+  color: white;
+}
+
+.platforms {
+  float: left;
+  width: 100%;
+  content: "";
+  clear: both;
+}
+
+.darwins, .win32s {
+  width: 50%;
+  float: left;
+}
+
+.darwins li, .win32s li {
+  list-style: none;
+  text-align: left;
+}
