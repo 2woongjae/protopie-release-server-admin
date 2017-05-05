@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom';
 import Detail from '../Detail';
 
 import './App.css';
@@ -34,8 +35,8 @@ export interface VersionWin32 {
 }
 
 export interface AppProps {
-    darwins: VersionDarwin[];
-    win32s: VersionWin32[];
+    darwin: VersionDarwin[];
+    win32: VersionWin32[];
 }
 
 export interface AppState {
@@ -43,7 +44,102 @@ export interface AppState {
     version: string;
 }
 
-export default class App extends React.Component<AppProps, AppState> {
+const darwin300: VersionDarwin = {
+    version: '3.0.0',
+    note: '### 3.0.0\n' +
+    '- [Test] 3.0.0',
+    file: 'ProtoPie-3.0.0-mac.zip',
+    metadata: {
+        osx: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const darwin301: VersionDarwin = {
+    version: '3.0.1',
+    note: '### 3.0.1\n' +
+    '- [Test] 3.0.1',
+    file: 'ProtoPie-3.0.1-mac.zip',
+    metadata: {
+        osx: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const darwin310: VersionDarwin = {
+    version: '3.1.0',
+    note: '### 3.1.0\n' +
+    '- [Test] 3.1.0',
+    file: 'ProtoPie-3.1.0-mac.zip',
+    metadata: {
+        osx: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const darwin322: VersionDarwin = {
+    version: '3.2.2',
+    note: '### 3.2.2\n' +
+    '- [Test] 3.2.2',
+    file: 'ProtoPie-3.2.2-mac.zip',
+    metadata: {
+        osx: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const darwin323: VersionDarwin = {
+    version: '3.2.3',
+    note: '### 3.2.3\n' +
+    '- [Test] 3.2.3',
+    file: 'ProtoPie-3.2.3-mac.zip',
+    metadata: {
+        osx: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const win32323: VersionWin32 = {
+    version: '3.2.3',
+    note: '### 3.2.3\n' +
+    '- [Test] [windows] 3.2.3',
+    file: 'ProtoPie-3.2.3-Setup.exe',
+    metadata: {
+        win32: {
+            size: 72508193,
+            checksum: '9e17109653422497d943c813b42739a5f3553df9'
+        }
+    },
+    pub_date: '2017-02-16T12:02:07.535Z',
+    state: 'enabled'
+};
+
+const data: AppProps = {
+    darwin: [darwin300, darwin301, darwin310, darwin322, darwin323],
+    win32: [win32323]
+};
+
+class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
 
@@ -54,15 +150,12 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
     render() {
-        const showDarwin = this.showDarwin.bind(this);
-        const showWin32 = this.showWin32.bind(this);
-
-        const darwins = this.props.darwins.map((v: VersionDarwin) => {
-            return <li key={`darwin-${v.version}`}><a href="#" onClick={showDarwin}>{v.version}</a></li>;
+        const darwins = this.props.darwin.map((v: VersionDarwin) => {
+            return <li key={`darwin-${v.version}`}><Link to={`/darwin/${v.version}`}>{v.version}</Link></li>;
         });
 
-        const win32s = this.props.win32s.map((v: VersionWin32) => {
-            return <li key={`win32-${v.version}`}><a href="#" onClick={showWin32}>{v.version}</a></li>;
+        const win32s = this.props.win32.map((v: VersionWin32) => {
+            return <li key={`win32-${v.version}`}><Link to={`/win32/${v.version}`}>{v.version}</Link></li>;
         });
 
         return (
@@ -84,23 +177,30 @@ export default class App extends React.Component<AppProps, AppState> {
                         </ul>
                     </div>
                 </div>
-                <hr />
-                <Detail {...this.props} platform={this.state.platform} version={this.state.version} />
             </div>
         );
     }
-
-    private showDarwin(e: MouseEvent): void {
-        this.setState({
-            platform: 'darwin',
-            version: (e.target as Element).innerHTML
-        });
-    }
-
-    private showWin32(e: MouseEvent): void {
-        this.setState({
-            platform: 'win32',
-            version: (e.target as Element).innerHTML
-        });
-    }
 }
+
+const AppRouter = () => (
+    <Router>
+        <div>
+            <Route exact={true} path="/" render={() => <App {...data} />} />
+            <Route
+                path="/:platform/:version?"
+                render={({match}) => {
+                    const platform = match.params.platform;
+                    if (platform === 'darwin' || platform === 'win32') {
+                        const version = match.params.version || '';
+                        return <Detail {...data} platform={platform} version={version}/>;
+                    } else {
+                        return <Redirect to="/" />;
+                    }
+                }} />
+            <Redirect to="/" />
+        </div>
+    </Router>
+
+);
+
+export default AppRouter;
